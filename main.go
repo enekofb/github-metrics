@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/enekofb/metrics/pkg/config"
 	"github.com/enekofb/metrics/pkg/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -34,6 +35,10 @@ func healthz(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	err := config.Read("resources")
+	if err != nil {
+		panic(err)
+	}
 	recordMetrics()
 	http.Handle("/metrics", promhttp.Handler())
 	http.Handle("/healthz", http.HandlerFunc(healthz))
