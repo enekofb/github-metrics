@@ -2,29 +2,25 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app.kubernetes.io/name: metrics
+    app: metrics
   name: metrics
   namespace: {{ .Release.Namespace | quote }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: metrics
+      app: metrics
   template:
     metadata:
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/path: "/metrics"
-        prometheus.io/port: "8080"
       labels:
-        app.kubernetes.io/name: metrics
+        app: metrics
     spec:
       containers:
       - image: enekofb/metrics:latest
         name: metrics
         ports:
         - containerPort: 8080
-          name: http
+          name: metrics
           protocol: TCP
         readinessProbe:
           httpGet:
