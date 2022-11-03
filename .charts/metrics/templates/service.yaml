@@ -12,6 +12,6 @@ spec:
   - name: http
     port: 8080
     protocol: TCP
-    targetPort: 2112
+    targetPort: 8080
   selector:
     app.kubernetes.io/name: metrics
