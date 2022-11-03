@@ -12,3 +12,24 @@ Where
 - categories are labels
 - issues are labels
 ```
+
+## Requirements
+- kind
+- tilt 
+- flux
+
+## Getting Started
+
+For development just execute
+- make kind
+- make dev
+
+Get prometheus stack installed via [helm](./tools/prometheus.yaml)
+
+Once everything is ready get grafana to visualice available metrics
+
+```yaml
+kubectl port-forward -n prometheus svc/prometheus-prometheus-grafana 8000:80
+```
+
+
