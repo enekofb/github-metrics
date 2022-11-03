@@ -29,8 +29,14 @@ func recordMetrics() {
 	}()
 }
 
+func healthz(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
 func main() {
 	recordMetrics()
 	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":2112", nil)
+	http.Handle("/healthz", http.HandlerFunc(healthz))
+
+	http.ListenAndServe(":8080", nil)
 }
