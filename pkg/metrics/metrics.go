@@ -1,31 +1,30 @@
 package metrics
 
 import (
+	"github.com/enekofb/metrics/pkg/config"
 	"github.com/enekofb/metrics/pkg/issues"
 	github2 "github.com/google/go-github/v48/github"
-	"os"
 	"time"
 )
 
-func GetLastMonthDefectMetricsByTeam() (int, error) {
+func GetLastMonthDefectMetricsByTeam(config config.MetricsConfig) (int, error) {
 
-	//TODO we want this in config map
-	owner := os.Getenv("GITHUB_OWNER")
+	owner := config.GithubConfig.Owner
 	if owner == "" {
 		return -1, nil
 	}
 
-	repo := os.Getenv("GITHUB_REPO")
+	repo := config.GithubConfig.Repo
 	if repo == "" {
 		return -1, nil
 	}
 
-	defectLabel := os.Getenv("GITHUB_BUG_LABEL")
+	defectLabel := config.GithubConfig.BugLabel
 	if defectLabel == "" {
 		return -1, nil
 	}
 
-	teamLabel := os.Getenv("GITHUB_TEAM_LABEL")
+	teamLabel := config.GithubConfig.TeamLabel
 	if teamLabel == "" {
 		return -1, nil
 	}
