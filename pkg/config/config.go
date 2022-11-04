@@ -19,19 +19,19 @@ type MetricsConfig struct {
 
 func Read(configPath string) (MetricsConfig, error) {
 
-	metrics := MetricsConfig{}
+	metricsConfig := MetricsConfig{}
 
 	metricsConfigBytes, err := os.ReadFile(configPath)
 
 	if err != nil {
-		return metrics, err
+		return metricsConfig, err
 	}
 
-	err = yaml.Unmarshal(metricsConfigBytes, &metrics)
+	err = yaml.Unmarshal(metricsConfigBytes, &metricsConfig)
 	if err != nil {
-		return metrics, err
+		return metricsConfig, err
 	}
 
-	return metrics, nil
+	return metricsConfig, nil
 
 }

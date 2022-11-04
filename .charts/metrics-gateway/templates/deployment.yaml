@@ -18,33 +18,17 @@ spec:
       containers:
       - image: enekofb/metrics:latest
         name: metrics
+        volumeMounts:
+          - name: config
+            mountPath: /config
         env:
+          - name: CONFIG_PATH
+            value: "/config/config.yaml"
           - name: GITHUB_TOKEN
             valueFrom:
-              configMapKeyRef:
-                name: metrics
+              secretKeyRef:
+                name: github
                 key: GITHUB_TOKEN
-          - name: GITHUB_BUG_LABEL
-            valueFrom:
-              configMapKeyRef:
-                name: metrics
-                key: GITHUB_BUG_LABEL
-          - name: GITHUB_OWNER
-            valueFrom:
-              configMapKeyRef:
-                name: metrics
-                key: GITHUB_OWNER
-          - name: GITHUB_REPO
-            valueFrom:
-              configMapKeyRef:
-                name: metrics
-                key: GITHUB_REPO
-          - name: GITHUB_TEAM_LABEL
-            valueFrom:
-              configMapKeyRef:
-                name: metrics
-                key: GITHUB_TEAM_LABEL
-
         ports:
         - containerPort: 8080
           name: metrics
@@ -62,3 +46,10 @@ spec:
           requests:
             cpu: 100m
             memory: 20Mi
+      volumes:
+        - name: config
+          configMap:
+            name: metrics
+            items:
+              - key: config.yaml
+                path: config.yaml

@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"github.com/enekofb/metrics/pkg/config"
 	"github.com/enekofb/metrics/pkg/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -17,10 +19,10 @@ var (
 	})
 )
 
-func recordMetrics() {
+func recordMetrics(config config.MetricsConfig) {
 	go func() {
 		for {
-			numDefects, err := metrics.GetLastMonthDefectMetricsByTeam()
+			numDefects, err := metrics.GetLastMonthDefectMetricsByTeam(config)
 			if err != nil {
 				panic(err)
 			}
@@ -35,11 +37,15 @@ func healthz(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	err := config.Read("resources")
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		panic(fmt.Errorf("cannot find config path"))
+	}
+	config, err := config.Read(configPath)
 	if err != nil {
 		panic(err)
 	}
-	recordMetrics()
+	recordMetrics(config)
 	http.Handle("/metrics", promhttp.Handler())
 	http.Handle("/healthz", http.HandlerFunc(healthz))
 
