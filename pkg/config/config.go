@@ -1,34 +1,37 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"gopkg.in/yaml.v2"
+	"os"
+)
 
 type GithubConfig struct {
-	token     string `yaml:"token"`
-	bugLabel  string `yaml:"bug_label"`
-	owner     string `yaml:"owner"`
-	repo      string `yaml:"repo"`
-	teamLabel string `yaml:"team_label"`
+	Token     string `yaml:"token"`
+	BugLabel  string `yaml:"bug_label"`
+	Owner     string `yaml:"owner"`
+	Repo      string `yaml:"repo"`
+	TeamLabel string `yaml:"team_label"`
 }
 
 type MetricsConfig struct {
-	githubConfig GithubConfig `yaml:"github"`
+	GithubConfig GithubConfig `yaml:"github"`
 }
 
-func Read(configPath string) (*MetricsConfig, error) {
-	viper.SetConfigName("config.yaml") // name of config file (without extension)
-	viper.SetConfigType("yaml")        // REQUIRED if the config file does not have the extension in the name
-	viper.AddConfigPath(configPath)    // optionally look for config in the working directory
-	err := viper.ReadInConfig()        // Find and read the config file
-	if err != nil {
-		return nil, err
-	}
-	conf := &MetricsConfig{}
+func Read(configPath string) (MetricsConfig, error) {
 
-	err = viper.Unmarshal(conf)
+	metrics := MetricsConfig{}
+
+	metricsConfigBytes, err := os.ReadFile(configPath)
+
 	if err != nil {
-		return nil, err
+		return metrics, err
 	}
 
-	return conf, nil
+	err = yaml.Unmarshal(metricsConfigBytes, &metrics)
+	if err != nil {
+		return metrics, err
+	}
+
+	return metrics, nil
 
 }

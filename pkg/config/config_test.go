@@ -6,8 +6,8 @@ import (
 )
 
 func TestRead(t *testing.T) {
-	metricsConfig, err := Read("../../resources")
+	metricsConfig, err := Read("../../resources/test/config.yaml")
 	require.NoError(t, err)
-	githubToken := metricsConfig.githubConfig.token
+	githubToken := metricsConfig.GithubConfig.Token
 	require.Equal(t, githubToken, "abc")
 }
