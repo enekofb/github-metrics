@@ -6,12 +6,19 @@ import (
 	"testing"
 )
 
-func TestGetLastMonthDefectMetricsByTeam(t *testing.T) {
+func TestCreateQueryFuncFromConfig(t *testing.T) {
 
-	//TODO complete me
-	config := config.MetricsConfig{}
-
-	numDefectsByTeam, err := GetLastMonthDefectMetricsByTeam(config)
+	var queryFunc QueryFunc
+	queryConfig := config.QueryConfig{
+		Owner:     "kubernetes",
+		Repo:      "kubernetes",
+		BugLabel:  "kind/bug",
+		TeamLabel: "sig/apps",
+	}
+	queryFunc = NewFromConfig(queryConfig)
+	require.NotNil(t, queryFunc)
+	i, err := queryFunc()
 	require.NoError(t, err)
-	require.NotEmpty(t, numDefectsByTeam > 0)
+	require.True(t, i > 0)
+
 }

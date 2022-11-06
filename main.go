@@ -7,6 +7,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -17,6 +18,8 @@ var (
 		Name: "defects_last_month",
 		Help: "defects last month",
 	})
+
+	logger = log.Default()
 )
 
 func recordMetrics(config config.MetricsConfig) {
@@ -37,6 +40,7 @@ func healthz(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	logger.Print("reading configuration")
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
 		panic(fmt.Errorf("cannot find config path"))
@@ -45,9 +49,23 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	createMetricsFromConfig(config.GithubConfig.Queries)
+
 	recordMetrics(config)
+
 	http.Handle("/metrics", promhttp.Handler())
 	http.Handle("/healthz", http.HandlerFunc(healthz))
 
 	http.ListenAndServe(":8080", nil)
+}
+
+func createMetricsFromConfig(queriesConfig config.QueryConfig) {
+	logger.Print("creating metrics from configuration")
+	for i, queryConfig := range queriesConfig {
+
+		metrics.NewFromConfig()
+
+	}
+
 }

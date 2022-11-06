@@ -5,12 +5,17 @@ import (
 	"os"
 )
 
-type GithubConfig struct {
-	Token     string `yaml:"token"`
-	BugLabel  string `yaml:"bug_label"`
+type QueryConfig struct {
+	Name      string `yaml:"name"`
 	Owner     string `yaml:"owner"`
 	Repo      string `yaml:"repo"`
+	BugLabel  string `yaml:"bug_label"`
 	TeamLabel string `yaml:"team_label"`
+}
+
+type GithubConfig struct {
+	Token   string        `yaml:"token"`
+	Queries []QueryConfig `yaml:"queries"`
 }
 
 type MetricsConfig struct {

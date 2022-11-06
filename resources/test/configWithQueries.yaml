@@ -1,0 +1,8 @@
+github:
+  token: "abc"
+  queries:
+    - name: "basic_query"
+      owner: "owner"
+      repo: "repo"
+      bug_label: "bug"
+      team_label: "team"
