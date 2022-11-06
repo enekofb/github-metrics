@@ -22,14 +22,19 @@ var (
 	logger = log.Default()
 )
 
-func recordMetrics(config config.MetricsConfig) {
+// TODO: needs to be a map
+func recordMetrics(queryFuncs []metrics.QueryFunc) {
 	go func() {
 		for {
-			numDefects, err := metrics.GetLastMonthDefectMetricsByTeam(config)
-			if err != nil {
-				panic(err)
+
+			for _, queryFunc := range queryFuncs {
+				numDefects, err := queryFunc()
+				if err != nil {
+					panic(err)
+				}
+				defectsLastMonth.Set(float64(numDefects))
 			}
-			defectsLastMonth.Set(float64(numDefects))
+
 			time.Sleep(2 * time.Second)
 		}
 	}()
@@ -50,9 +55,9 @@ func main() {
 		panic(err)
 	}
 
-	createMetricsFromConfig(config.GithubConfig.Queries)
+	queryFuncs := createMetricsFromConfig(config.GithubConfig.Queries)
 
-	recordMetrics(config)
+	recordMetrics(queryFuncs)
 
 	http.Handle("/metrics", promhttp.Handler())
 	http.Handle("/healthz", http.HandlerFunc(healthz))
@@ -60,12 +65,15 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
-func createMetricsFromConfig(queriesConfig config.QueryConfig) {
+func createMetricsFromConfig(queriesConfig []config.QueryConfig) []metrics.QueryFunc {
+	var queryFuncs []metrics.QueryFunc
+
 	logger.Print("creating metrics from configuration")
-	for i, queryConfig := range queriesConfig {
-
-		metrics.NewFromConfig()
-
+	for _, queryConfig := range queriesConfig {
+		logger.Println("create query function for %v", queryConfig)
+		queryFunc := metrics.NewFromConfig(queryConfig)
+		queryFuncs = append(queryFuncs, queryFunc)
 	}
 
+	return queryFuncs
 }
