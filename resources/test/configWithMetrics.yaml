@@ -1,0 +1,5 @@
+github:
+  token: abc
+metrics:
+  - name: "defects"
+    type: "gauge"

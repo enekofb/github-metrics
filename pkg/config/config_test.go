@@ -21,3 +21,13 @@ func TestCanReadQueryConfigurations(t *testing.T) {
 	require.Equal(t, query.Name, "basic_query")
 	require.Equal(t, query.BugLabel, "bug")
 }
+
+func TestCanReadMetricConfigurations(t *testing.T) {
+	config, err := Read("../../resources/test/configWithMetrics.yaml")
+	require.NoError(t, err)
+	metrics := config.MetricsConfig
+	require.NotEmpty(t, metrics)
+	metric := metrics[0]
+	require.Equal(t, metric.Name, "defects")
+	require.Equal(t, metric.Type, "gauge")
+}

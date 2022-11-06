@@ -18,13 +18,20 @@ type GithubConfig struct {
 	Queries []QueryConfig `yaml:"queries"`
 }
 
-type MetricsConfig struct {
-	GithubConfig GithubConfig `yaml:"github"`
+type MetricConfig struct {
+	Name string `yaml:"name"`
+	Type string `yaml:"type"`
 }
 
-func Read(configPath string) (MetricsConfig, error) {
+// TODO add test
+type Config struct {
+	GithubConfig  GithubConfig   `yaml:"github"`
+	MetricsConfig []MetricConfig `yaml:"metrics"`
+}
 
-	metricsConfig := MetricsConfig{}
+func Read(configPath string) (Config, error) {
+
+	metricsConfig := Config{}
 
 	metricsConfigBytes, err := os.ReadFile(configPath)
 
