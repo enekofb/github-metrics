@@ -4,11 +4,27 @@ import (
 	"github.com/enekofb/metrics/pkg/config"
 	"github.com/enekofb/metrics/pkg/issues"
 	github2 "github.com/google/go-github/v48/github"
+	"log"
 )
 
 type QueryFunc func() (int, error)
 
-func NewFromConfig(queryConfig config.QueryConfig) func() (int, error) {
+var logger = log.Default()
+
+func CreateMetricsFromConfig(queriesConfig []config.QueryConfig) map[string]QueryFunc {
+	var queryFuncs map[string]QueryFunc
+
+	logger.Print("creating metrics from configuration")
+	for _, queryConfig := range queriesConfig {
+		logger.Println("create query function for %v", queryConfig)
+		queryFunc := createMetricFuncFromConfig(queryConfig)
+		queryFuncs[queryConfig.Name] = queryFunc
+	}
+
+	return queryFuncs
+}
+
+func createMetricFuncFromConfig(queryConfig config.QueryConfig) func() (int, error) {
 
 	return func() (int, error) {
 

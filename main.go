@@ -55,7 +55,7 @@ func main() {
 		panic(err)
 	}
 
-	queryFuncs := createMetricsFromConfig(config.GithubConfig.Queries)
+	queryFuncs := metrics.CreateMetricsFromConfig(config.GithubConfig.Queries)
 
 	recordMetrics(queryFuncs)
 
@@ -63,17 +63,4 @@ func main() {
 	http.Handle("/healthz", http.HandlerFunc(healthz))
 
 	http.ListenAndServe(":8080", nil)
-}
-
-func createMetricsFromConfig(queriesConfig []config.QueryConfig) []metrics.QueryFunc {
-	var queryFuncs []metrics.QueryFunc
-
-	logger.Print("creating metrics from configuration")
-	for _, queryConfig := range queriesConfig {
-		logger.Println("create query function for %v", queryConfig)
-		queryFunc := metrics.NewFromConfig(queryConfig)
-		queryFuncs = append(queryFuncs, queryFunc)
-	}
-
-	return queryFuncs
 }
