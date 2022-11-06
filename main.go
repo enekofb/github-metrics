@@ -14,25 +14,26 @@ import (
 )
 
 var (
-	defectsLastMonth = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "defects_last_month",
-		Help: "defects last month",
-	})
-
 	logger = log.Default()
 )
 
-// TODO: needs to be a map
-func recordMetrics(queryFuncs []metrics.QueryFunc) {
+type Metric struct {
+	Name             string
+	MetricFunc       metrics.QueryFunc
+	PrometheusMetric prometheus.Gauge
+}
+
+func recordMetrics(metrics []Metric) {
 	go func() {
 		for {
 
-			for _, queryFunc := range queryFuncs {
-				numDefects, err := queryFunc()
+			for _, metric := range metrics {
+				logger.Println("execute %v", metric.Name)
+				metricValue, err := metric.MetricFunc()
 				if err != nil {
-					panic(err)
+					logger.Println("error %v", err.Error())
 				}
-				defectsLastMonth.Set(float64(numDefects))
+				metric.PrometheusMetric.Set(float64(metricValue))
 			}
 
 			time.Sleep(2 * time.Second)
@@ -56,11 +57,29 @@ func main() {
 	}
 
 	queryFuncs := metrics.CreateMetricsFromConfig(config.GithubConfig.Queries)
-
-	recordMetrics(queryFuncs)
+	metrics := createMetrics(queryFuncs)
+	recordMetrics(metrics)
 
 	http.Handle("/metrics", promhttp.Handler())
 	http.Handle("/healthz", http.HandlerFunc(healthz))
 
 	http.ListenAndServe(":8080", nil)
+}
+
+// TODO move me to a better place
+func createMetrics(funcs map[string]metrics.QueryFunc) []Metric {
+	var metrics []Metric
+	for queryName, queryFunc := range funcs {
+		metric := Metric{
+			Name:       queryName,
+			MetricFunc: queryFunc,
+			PrometheusMetric: promauto.NewGauge(prometheus.GaugeOpts{
+				Name: queryName,
+				Help: queryName,
+			}),
+		}
+		metrics = append(metrics, metric)
+	}
+
+	return metrics
 }
