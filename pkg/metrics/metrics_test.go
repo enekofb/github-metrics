@@ -1,27 +1,30 @@
 package metrics
 
 import (
+	"github.com/enekofb/metrics/pkg/config"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-// TODO: test me
 func TestCreateQueryFuncFromConfig(t *testing.T) {
 
-	//var queryFuncs map[string]QueryFunc
-	//queryConfig := config.QueryConfig{
-	//	Owner:     "kubernetes",
-	//	Repo:      "kubernetes",
-	//	BugLabel:  "kind/bug",
-	//	TeamLabel: "sig/apps",
-	//}
-	//
-	//queryFuncs =createMetricFuncFromConfig([]config.QueryConfig{queryConfig})
-	//require.NotEmpty(t, queryFuncs)
-	//for queryName, queryFunc := range queryFuncs {
-	//	require.Equal(t, queryName, queryConfig.MetricName)
-	//	i, err := queryFunc()
-	//	require.NoError(t, err)
-	//	require.True(t, i > 0)
-	//}
+	config := config.Config{
+		GithubConfig: config.GithubConfig{
+			Token:   "abc",
+			Queries: nil,
+		},
+		MetricsConfig: []config.MetricConfig{
+			{
+				Name: "metric_test",
+				Type: "gauge",
+			},
+		},
+	}
+
+	metrics := CreateMetricsFromConfig(config)
+	for _, metric := range metrics {
+		require.Equal(t, metric.Name, "metric_test")
+
+	}
 
 }

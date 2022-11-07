@@ -55,7 +55,7 @@ func createQueryFuncs(queriesConfig []config.QueryConfig) map[string][]QueryFunc
 
 	logger.Print("creating metrics from configuration")
 	for _, queryConfig := range queriesConfig {
-		logger.Println("create query function for %v", queryConfig)
+		logger.Printf("create query function for %s", queryConfig)
 		queryFunc := createMetricFuncFromConfig(queryConfig)
 		queryFuncMap[queryConfig.MetricName] = append(queryFuncMap[queryConfig.MetricName], queryFunc)
 	}
