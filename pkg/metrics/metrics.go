@@ -4,6 +4,8 @@ import (
 	"github.com/enekofb/metrics/pkg/config"
 	"github.com/enekofb/metrics/pkg/issues"
 	github2 "github.com/google/go-github/v48/github"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"log"
 )
 
@@ -11,17 +13,53 @@ type QueryFunc func() (int, error)
 
 var logger = log.Default()
 
-func CreateMetricsFromConfig(queriesConfig []config.QueryConfig) map[string]QueryFunc {
-	var queryFuncs map[string]QueryFunc
+type Metric struct {
+	Name             string
+	MetricFuncs      []QueryFunc
+	PrometheusMetric prometheus.Gauge
+}
+
+func CreateMetricsFromConfig(conf config.Config) []Metric {
+	metricsByMetricName := createMetrics(conf.MetricsConfig)
+	queryFuncByMetricName := createQueryFuncs(conf.GithubConfig.Queries)
+	var metrics []Metric
+	for metricName, metric := range metricsByMetricName {
+		m := Metric{
+			Name:             metricName,
+			MetricFuncs:      queryFuncByMetricName[metricName],
+			PrometheusMetric: metric.PrometheusMetric,
+		}
+		metrics = append(metrics, m)
+	}
+	return metrics
+}
+
+// TODO move me to a better place
+func createMetrics(metricsConfig []config.MetricConfig) map[string]Metric {
+	var metrics map[string]Metric
+	for _, metricConfig := range metricsConfig {
+		metric := Metric{
+			Name: metricConfig.Name,
+			PrometheusMetric: promauto.NewGauge(prometheus.GaugeOpts{
+				Name: metricConfig.Name,
+			}),
+		}
+		metrics[metric.Name] = metric
+	}
+
+	return metrics
+}
+
+func createQueryFuncs(queriesConfig []config.QueryConfig) map[string][]QueryFunc {
+	var queryFuncMap map[string][]QueryFunc
 
 	logger.Print("creating metrics from configuration")
 	for _, queryConfig := range queriesConfig {
 		logger.Println("create query function for %v", queryConfig)
 		queryFunc := createMetricFuncFromConfig(queryConfig)
-		queryFuncs[queryConfig.Name] = queryFunc
+		queryFuncMap[queryConfig.MetricName] = append(queryFuncMap[queryConfig.MetricName], queryFunc)
 	}
-
-	return queryFuncs
+	return queryFuncMap
 }
 
 func createMetricFuncFromConfig(queryConfig config.QueryConfig) func() (int, error) {

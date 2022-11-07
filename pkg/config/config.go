@@ -6,11 +6,11 @@ import (
 )
 
 type QueryConfig struct {
-	Name      string `yaml:"name"`
-	Owner     string `yaml:"owner"`
-	Repo      string `yaml:"repo"`
-	BugLabel  string `yaml:"bug_label"`
-	TeamLabel string `yaml:"team_label"`
+	MetricName string `yaml:"metric_name"`
+	Owner      string `yaml:"owner"`
+	Repo       string `yaml:"repo"`
+	BugLabel   string `yaml:"bug_label"`
+	TeamLabel  string `yaml:"team_label"`
 }
 
 type GithubConfig struct {
@@ -23,7 +23,6 @@ type MetricConfig struct {
 	Type string `yaml:"type"`
 }
 
-// TODO add test
 type Config struct {
 	GithubConfig  GithubConfig   `yaml:"github"`
 	MetricsConfig []MetricConfig `yaml:"metrics"`

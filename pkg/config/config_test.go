@@ -18,7 +18,7 @@ func TestCanReadQueryConfigurations(t *testing.T) {
 	queries := metricsConfig.GithubConfig.Queries
 	require.NotEmpty(t, queries)
 	query := queries[0]
-	require.Equal(t, query.Name, "basic_query")
+	require.Equal(t, query.MetricName, "basic_query")
 	require.Equal(t, query.BugLabel, "bug")
 }
 

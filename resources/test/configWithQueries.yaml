@@ -1,7 +1,7 @@
 github:
   token: "abc"
   queries:
-    - name: "basic_query"
+    - metric_name: "basic_query"
       owner: "owner"
       repo: "repo"
       bug_label: "bug"

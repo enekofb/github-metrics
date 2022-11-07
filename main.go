@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/enekofb/metrics/pkg/config"
 	"github.com/enekofb/metrics/pkg/metrics"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
@@ -17,25 +15,19 @@ var (
 	logger = log.Default()
 )
 
-type Metric struct {
-	Name             string
-	MetricFunc       metrics.QueryFunc
-	PrometheusMetric prometheus.Gauge
-}
-
-func recordMetrics(metrics []Metric) {
+func recordMetrics(metrics []metrics.Metric) {
 	go func() {
 		for {
-
 			for _, metric := range metrics {
 				logger.Println("execute %v", metric.Name)
-				metricValue, err := metric.MetricFunc()
-				if err != nil {
-					logger.Println("error %v", err.Error())
+				for _, metricFunc := range metric.MetricFuncs {
+					metricValue, err := metricFunc()
+					if err != nil {
+						logger.Println("error %v", err.Error())
+					}
+					metric.PrometheusMetric.Set(float64(metricValue))
 				}
-				metric.PrometheusMetric.Set(float64(metricValue))
 			}
-
 			time.Sleep(2 * time.Second)
 		}
 	}()
@@ -56,30 +48,10 @@ func main() {
 		panic(err)
 	}
 
-	queryFuncs := metrics.CreateMetricsFromConfig(config.GithubConfig.Queries)
-	metrics := createMetrics(queryFuncs)
+	metrics := metrics.CreateMetricsFromConfig(config)
 	recordMetrics(metrics)
 
 	http.Handle("/metrics", promhttp.Handler())
 	http.Handle("/healthz", http.HandlerFunc(healthz))
-
 	http.ListenAndServe(":8080", nil)
-}
-
-// TODO move me to a better place
-func createMetrics(funcs map[string]metrics.QueryFunc) []Metric {
-	var metrics []Metric
-	for queryName, queryFunc := range funcs {
-		metric := Metric{
-			Name:       queryName,
-			MetricFunc: queryFunc,
-			PrometheusMetric: promauto.NewGauge(prometheus.GaugeOpts{
-				Name: queryName,
-				Help: queryName,
-			}),
-		}
-		metrics = append(metrics, metric)
-	}
-
-	return metrics
 }
